@@ -1,18 +1,21 @@
-export default function handler(req, res) {
-  const host = req.headers.host || '';
-  const subdomain = host.split('.')[0];
+export default async function handler(req, res) {
+  try {
+    const host = req.headers.host || '';
+    const subdomain = host.split('.')[0];
 
-  res.status(200).send(`
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-      <head>
-        <meta charset="UTF-8" />
-        <title>${subdomain} | Media5</title>
-      </head>
-      <body style="font-family: Arial; padding: 40px;">
-        <h1>Site ativo: ${host}</h1>
-        <p>Rota API funcionando corretamente.</p>
-      </body>
-    </html>
-  `);
+    if (!subdomain || subdomain === 'www' || subdomain === 'midia5') {
+      return res.status(400).send('Subdomain inválido');
+    }
+
+    const url = `https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render?subdomain=${subdomain}`;
+
+    const response = await fetch(url);
+    const contentType = response.headers.get('content-type') || 'text/html';
+    const body = await response.text();
+
+    res.setHeader('Content-Type', contentType);
+    res.status(response.status).send(body);
+  } catch (err) {
+    res.status(500).send('Erro no proxy');
+  }
 }
