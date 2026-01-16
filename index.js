@@ -7,11 +7,12 @@ export default function handler(req, res) {
     <html lang="pt-BR">
       <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>${subdomain} | Media5</title>
       </head>
       <body style="font-family: Arial; padding: 40px;">
         <h1>Site ativo: ${host}</h1>
-        <p>Rota raiz funcionando corretamente.</p>
+        <p>Rota raiz (/) funcionando corretamente.</p>
       </body>
     </html>
   `);
