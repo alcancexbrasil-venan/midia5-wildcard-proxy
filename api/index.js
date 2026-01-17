@@ -7,12 +7,12 @@ export default async function handler(req, res) {
       return res.status(200).send("OK - domínio raiz");
     }
 
+    // CHAMA A EDGE FUNCTION QUE BUSCA OS DADOS REAIS
     const url = `https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render?subdomain=${encodeURIComponent(subdomain)}`;
 
     const response = await fetch(url);
     const body = await response.text();
 
-    // Força Content-Type correto para HTML
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     return res.status(response.status).send(body);
