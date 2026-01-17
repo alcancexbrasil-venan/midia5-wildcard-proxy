@@ -1,21 +1,23 @@
 export default async function handler(req, res) {
   try {
-    const host = req.headers.host || '';
-    const subdomain = host.split('.')[0];
+    const host = (req.headers.host || "").split(":")[0];
+    const subdomain = host.replace(".midia5.com.br", "").split(".")[0];
 
-    if (!subdomain || subdomain === 'www' || subdomain === 'midia5') {
-      return res.status(400).send('Subdomain inválido');
+    if (!subdomain || subdomain === "www" || subdomain === "midia5") {
+      return res.status(200).send("OK - domínio raiz");
     }
 
-    const url = `https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render?subdomain=${subdomain}`;
+    const url = `https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render?subdomain=${encodeURIComponent(subdomain)}`;
 
     const response = await fetch(url);
-    const contentType = response.headers.get('content-type') || 'text/html';
     const body = await response.text();
 
-    res.setHeader('Content-Type', contentType);
-    res.status(response.status).send(body);
-  } catch (err) {
-    res.status(500).send('Erro no proxy');
+    // Força Content-Type correto para HTML
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    return res.status(response.status).send(body);
+  } catch (error) {
+    console.error("Proxy error:", error);
+    return res.status(500).send("Erro no proxy");
   }
 }
