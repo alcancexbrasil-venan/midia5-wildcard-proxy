@@ -1,30 +1,35 @@
 export default async function handler(req, res) {
-  // IMPORTANTE: Vercel coloca o host original em x-forwarded-host primeiro
-  const originalHost = 
-    req.headers['x-forwarded-host'] || 
-    req.headers['x-vercel-forwarded-host'] || 
-    req.headers['host'] || 
-    '';
-  
-  console.log('Proxy - Host capturado:', originalHost);
-  
+  const incomingHostRaw =
+    req.headers["x-forwarded-host"] ||
+    req.headers["x-vercel-forwarded-host"] ||
+    req.headers["host"] ||
+    "";
+
+  const incomingHost = String(incomingHostRaw).split(",")[0].trim().toLowerCase();
+
+  // Fallback: extrai subdomínio pra garantir mesmo se header vier “sujo”
+  const subdomain = incomingHost.endsWith(".metabusy.com.br")
+    ? incomingHost.split(".")[0]
+    : "";
+
+  const url = new URL("https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render");
+  if (subdomain) url.searchParams.set("subdomain", subdomain);
+
   try {
-    const response = await fetch('https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render', {
-      method: 'GET',
+    const response = await fetch(url.toString(), {
+      method: req.method,
       headers: {
-        'Content-Type': 'text/html',
-        'x-forwarded-host': originalHost,
-        'x-original-host': originalHost,  // Header backup
+        "Content-Type": "text/html",
+        "x-forwarded-host": incomingHost,
+        "x-original-host": incomingHost,
       },
     });
-    
+
     const html = await response.text();
-    
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "no-cache");
     res.status(response.status).send(html);
   } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).send('Erro no proxy: ' + error.message);
+    res.status(500).send("Erro no proxy");
   }
 }
