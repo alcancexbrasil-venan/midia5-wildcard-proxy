@@ -1,9 +1,9 @@
 export default async function handler(req, res) {
   try {
     const host = (req.headers.host || "").split(":")[0];
-    const subdomain = host.replace(".midia5.com.br", "").split(".")[0];
+    const subdomain = host.replace(".metabusy.com.br", "").split(".")[0];
 
-    if (!subdomain || subdomain === "www" || subdomain === "midia5") {
+    if (!subdomain || subdomain === "www" || subdomain === "metabusy") {
       return res.status(200).send("OK - domínio raiz");
     }
 
