@@ -5,9 +5,8 @@ export default async function handler(req, res) {
     req.headers["host"] ||
     "";
 
-  const incomingHost = String(incomingHostRaw).split(",")[0].trim().toLowerCase();
+  const incomingHost = String(incomingHostRaw).split(",")[0].toLowerCase();
 
-  // Fallback: extrai subdomínio pra garantir mesmo se header vier “sujo”
   const subdomain = incomingHost.endsWith(".metabusy.com.br")
     ? incomingHost.split(".")[0]
     : "";
@@ -30,6 +29,6 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-cache");
     res.status(response.status).send(html);
   } catch (error) {
-    res.status(500).send("Erro no proxy");
+    res.status(500).send("Proxy error");
   }
 }
