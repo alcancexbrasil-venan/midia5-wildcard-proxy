@@ -5,30 +5,42 @@ export default async function handler(req, res) {
     req.headers["host"] ||
     "";
 
-  const incomingHost = String(incomingHostRaw).split(",")[0].toLowerCase();
+  const incomingHost = String(incomingHostRaw)
+    .split(",")[0]
+    .toLowerCase();
 
   const subdomain = incomingHost.endsWith(".metabusy.com.br")
     ? incomingHost.split(".")[0]
     : "";
 
-  const url = new URL("https://rhniytwnpmdytftyoyiq.supabase.co/functions/v1/site-render");
-  if (subdomain) url.searchParams.set("subdomain", subdomain);
+  const url = new URL(
+    "https://rhnijvtmpmdyftfyoyiq.supabase.co/functions/v1/site-render"
+  );
+
+  if (subdomain) {
+    url.searchParams.set("subdomain", subdomain);
+  }
 
   try {
     const response = await fetch(url.toString(), {
       method: req.method,
       headers: {
-        "Content-Type": "text/html",
         "x-forwarded-host": incomingHost,
         "x-original-host": incomingHost,
       },
     });
 
-    const html = await response.text();
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    const contentType =
+      response.headers.get("content-type") || "text/plain";
+
+    const body = await response.arrayBuffer();
+
+    res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "no-cache");
-    res.status(response.status).send(html);
+
+    res.status(response.status).send(Buffer.from(body));
   } catch (error) {
+    console.error(error);
     res.status(500).send("Proxy error");
   }
 }
