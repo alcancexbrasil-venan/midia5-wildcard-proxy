@@ -33,12 +33,12 @@ export default async function handler(req, res) {
     const contentType =
       response.headers.get("content-type") || "text/plain";
 
-    const body = await response.arrayBuffer();
+    const body = await response.text();
 
     res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "no-cache");
 
-    res.status(response.status).send(Buffer.from(body));
+    res.status(response.status).send(body);
   } catch (error) {
     console.error(error);
     res.status(500).send("Proxy error");
